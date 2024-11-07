@@ -1,11 +1,12 @@
 # AgarRepacker
 
-the goal of the repacker was to act as a proxy between agario server and old agario clients, Miniclip (Agar.IO founders) encrypted the whole client-server comunnication using an special algorithm to calculate a new key for every packet sent to
-the server, tthey obfuscated this using LLVM to emscripten to execute on the browser, wich i had to reverse engineer
+This project was created when I was a kid and later published on my old GitHub account, so please forgive the shitty code. 😅 AgarRepacker was intended to act as a proxy between Agar.io servers and legacy Agar.io clients, allowing you to use old clients that didn’t support newer server protocols. It was my attempt to bridge the gap between the old and new versions of Agar.io.
 
-This project was created when I was a kid and later i decided to publish it on my old GitHub account, so please forgive the shitty code. The goal of AgarRepacker was to act as a proxy between the Agar.io server and old Agar.io clients. This allows you to play on the latest servers using legacy clients that don't natively support newer protocols.
+Miniclip (the creators of Agar.io) encrypted the entire client-server communication using a special algorithm to generate a new 32-bit key for each packet sent to the server. They obfuscated the core code using LLVM and Emscripten to run it in the browser. To make AgarRepacker work, I had to reverse-engineer the encryption algorithm and the communication protocol.
 
-Miniclip (the founders of Agar.io) encrypted the client-server communication with a special algorithm that generates a unique 32 bit key for each packet sent to the server.
+# Main Encryption/Decryption Breakdown
+Miniclip used a special algorithm to generate a unique key for each packet. This key is then used for XOR encryption on each byte of the packet before sending it to the server. Here's the main key-generation algorithm:
+
 ```javascript
         key = Math.imul(key, 1540483477) | 0
         key = (Math.imul(key >>> 24 ^ key, 1540483477) | 0) ^ 114296087
@@ -14,6 +15,6 @@ Miniclip (the founders of Agar.io) encrypted the client-server communication wit
         return key
 ```
 
-Then a XOR operation is made for every byte of the "real" packet that is going to be sent to the server using the key, after sent, the key is rotated.
+After the key is generated, a XOR operation is applied to each byte of the packet using the key. The key is rotated after each packet is sent.
 
-They obfuscated the full core code using LLVM and Emscripten to execute it in the browser. To make AgarRepacker work, I had to reverse engineer the encryption and communication protocol.
+AgarRepacker was created to decode and re-encrypt the packets on the fly so old clients could still communicate with newer servers.
